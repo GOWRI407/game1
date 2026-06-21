@@ -1,0 +1,57 @@
+Gesture-Controlled 3D Puzzle Demo
+
+A minimal demo combining MediaPipe hand-tracking ML with a 3D puzzle game
+built in the Ursina engine (pure Python, runs on top of Panda3D).
+
+What it does
+
+
+Webcam feed is processed by MediaPipe to detect hand landmarks.
+A simple rule-based classifier turns landmark positions into gestures:
+OPEN_PALM, FIST, POINT_LEFT, POINT_RIGHT, THUMBS_UP.
+Gestures are mapped to player actions in a 3D scene: move forward, turn,
+jump, stop.
+Puzzle goal: push the orange crate onto the blue target tile.
+
+
+Setup
+
+bashcd gesture_game
+python -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+
+Run
+
+Keyboard mode (no webcam needed, good for testing the game logic):
+
+bashpython game.py
+
+Controls: W/A/D to move/turn, Space to jump, S to stop.
+
+Gesture mode (requires a webcam):
+
+bashpython game.py --gestures
+
+A second window will pop up showing your webcam feed with hand landmarks
+and the currently detected gesture — useful for calibrating/debugging.
+Add --no-preview to hide that window once you trust the recognizer.
+
+Gesture cheat sheet
+
+GestureActionOpen palmMove forwardPoint leftTurn leftPoint rightTurn rightThumbs upJumpFistStop
+
+Notes / next steps
+
+
+The gesture classifier is rule-based (fast, no training needed) using
+finger-extension geometry from MediaPipe landmarks. For a "real" ML
+approach, swap classify_gesture() for a small trained classifier
+(e.g. an sklearn SVM or tiny PyTorch MLP) on landmark coordinates —
+the threading/game-loop architecture stays identical.
+push_crate() is a simplified proximity-based push; a physics engine
+(e.g. swapping Ursina's collider for a proper rigidbody system) would
+make it feel more natural for a fuller game.
+Tested architecture: webcam thread is fully decoupled from the Ursina
+render loop via GestureState, so frame drops in CV processing never
+stall the game's frame rate.
